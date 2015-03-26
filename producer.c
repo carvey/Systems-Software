@@ -3,7 +3,7 @@ This file should create 2 threads which produce and create cupcakes in unison.
 10 items should be produced, and consumers shold consume all 10 of these items
 The produce should sleep 2 seconds after each produced product, and consumers should visit at random
 */
-
+/*By (Group 1) Charles Arvey, Alexandria Sanders, Shannon Sergeant, Chris Hanson, and Garrett Edwards*/
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
