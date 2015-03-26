@@ -12,6 +12,7 @@ void *produce(void *count);
 void *consume(void *count);
 
 int COUNT_MAX = 10;
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
 
 
 int main()
@@ -19,6 +20,7 @@ int main()
 	//set a seed for the random number generator
 	srand(time(NULL));
 
+	//the count variable will be used to track the number of items
 	int count = 0;
 
 	//Init the two threads
@@ -30,10 +32,7 @@ int main()
 	pthread_create(&consume_thread, NULL, consume, &count);
 
 
-	if (pthread_join(consume_thread, NULL)) {
-		fprintf(stderr, "Error joining thread\n");
-		return 2;
-	}
+	pthread_join(consume_thread, NULL);
 	printf("Final count (for confirmation): %d\n", count);
 }
 
@@ -46,8 +45,12 @@ void *produce(void *counter)
 	for (i = 0; i < COUNT_MAX; ++i)
 	{
 		//increment count
+		pthread_mutex_lock(&m);
 		*count = ++(*count);
 		printf("Produced! Count is now: %d\n", *count);
+		pthread_mutex_unlock(&m);
+
+		//sleep for 2 seconds
 		sleep(2);
 	}
 	return NULL;
@@ -69,10 +72,15 @@ void *consume(void *counter)
 		else
 		{
 			//sleep a random num of second between 0 and 6
+			//sleep is first here so that produce() and consume() don't both try and increment/decrement simultaneously at first
 			sleep(rand() % 7);
+
 			//decrement count
+			pthread_mutex_lock(&m);
 			*count = --(*count);
 			printf("Consumed! Count is now: %d\n", *count);
+			pthread_mutex_unlock(&m);
+
 		}
 	}
 
