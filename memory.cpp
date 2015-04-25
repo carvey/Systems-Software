@@ -186,7 +186,7 @@ public:
             //no hit
             else
             {
-                faults++
+                faults++;
                 //this will check to see if the rows are filled out or not
                 if (page_vector.size() == segments)
                 {
