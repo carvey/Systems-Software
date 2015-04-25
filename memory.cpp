@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
+#include <deque>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -20,16 +23,29 @@ public:
         number = num;
     };
 
-    char print()
+    string print()
     {
         if (number == -1)
         {
-            return ' ';
+            return " ";
         }
         else
         {
-            return (char)number;
+            return to_string(number);
         }
+    }
+
+    bool empty()
+    {
+        if (number == -1)
+            return true;
+        return false;
+    }
+
+    //allows Page objects to be compared with the == operator
+    bool operator==(const Page& p) const
+    {
+        return number == p.number;
     }
 
 };
@@ -134,18 +150,92 @@ public:
     };
 
     vector<double> play_fifo()
+    /*
+    The function that will simulate the FIFO algorithm with the current Memory instance
+
+    FIFO: First in first out
+        The first page to come in will be the first page to leave once another location in memory 
+        is needed but currently filled
+
+    Return type: vector
+    Return: a vector of all data recorded for the algorithm where:
+        Element at index 0 = the time it took to run the algorithm
+        Element at index 1 = The number of hits the algorithm produced
+        Element at index 2 = The number of faults the algorithm produced
+    */
     {
         double time = 0;
         double hits = 0;
         double faults = 0;
 
-        //implement fifo here
+        vector<Page> page_vector;
+        vector<Page>::const_iterator pages_iterator;
+        //oldest_element_index will track the position of the page that will be removed next
+        int oldest_element_index = 0;
+
+        //loop over the columns in ps_mapping (this lines up with the current page also)
+        for (int column=0; column<ps_mapping.size(); column++)
+        {
+
+            //check for a hit
+            pages_iterator = find(page_vector.begin(), page_vector.end(), pages[column]);
+            //hit - pass all the other logic and go straight to adding the pages to ps_mappings
+            if (pages_iterator != page_vector.end()) {
+                hits++;
+            }
+            //no hit
+            else
+            {
+                faults++
+                //this will check to see if the rows are filled out or not
+                if (page_vector.size() == segments)
+                {
+                    //check whether the page at oldest_element_index needs to move back up to the top row
+                    if (oldest_element_index == page_vector.size()){
+                        oldest_element_index = 0;
+                        //will replace the oldest page in the vector with the newest page (located at pages[column])
+                        page_vector[oldest_element_index] = pages[column];
+                    }
+                    //if oldest_element_index is still at the top or somewhere in the middle of a column's rows
+                    else
+                        page_vector[oldest_element_index] = pages[column];
+                        oldest_element_index++;
+                }
+                //when the rows arent filled all the way to the bottom
+                else
+                {
+                    page_vector.push_back(pages.at(column));
+                }
+            }
+
+            
+            //loop over each page currently in page_vector (this will also line up with a columns rows)
+            //this will put the new page in ps_mapping so it can be drawn out
+            for (int row=0; row<page_vector.size(); row++)
+            {
+                ps_mapping.at(column).at(row) = page_vector.at(row);
+            }
+
+        }
 
         vector<double> final = {time, hits, faults};
         return final;
     };
 
     vector<double> play_lru()
+    /*
+    The function that will simulate the LRU algorithm with the current Memory instance
+
+    LRU: Least Recently Used
+        Like FIFO, but once a page already in memory is used again (hit), then it will now be the 
+        last element to leave memory
+
+    Return type: vector
+    Return: a vector of all data recorded for the algorithm where:
+        Element at index 0 = the time it took to run the algorithm
+        Element at index 1 = The number of hits the algorithm produced
+        Element at index 2 = The number of faults the algorithm produced
+    */
     {
         double time = 0;
         double hits = 0;
@@ -158,6 +248,15 @@ public:
     };
 
     vector<double> play_optimal()
+    /*
+    The function that will simulate the Optimal algorithm with the current Memory instance
+
+    Return type: vector
+    Return: a vector of all data recorded for the algorithm where:
+        Element at index 0 = the time it took to run the algorithm
+        Element at index 1 = The number of hits the algorithm produced
+        Element at index 2 = The number of faults the algorithm produced
+    */
     {
 
         double time = 0;
