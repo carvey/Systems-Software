@@ -8,7 +8,8 @@ int main()
 	srand(time(NULL));
 
 	// memory of 10 pages and 2 segments with set Page numbers
-	vector<int> pages_array = {4, 7, 3, 0, 1, 7, 3, 8, 5, 4, 5, 3, 4, 7};
+	// vector<int> pages_array = {2, 3, 4, 2, 1, 3, 7, 5, 4, 3};
+	vector<int> pages_array = {0, 4, 3, 2, 1, 4, 6, 3, 0};
 	Memory mem(pages_array, 3);
 	// mem.print_pages();
 
@@ -20,7 +21,7 @@ int main()
 	// cout << endl;
 	// mem2.print();
 
-	mem.play_fifo();
+	mem.play_optimal();
 	mem.print();
 
 	return 0;

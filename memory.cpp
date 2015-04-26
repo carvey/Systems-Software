@@ -170,7 +170,7 @@ public:
 
         vector<Page> page_vector;
         vector<Page>::const_iterator pages_iterator;
-        //oldest_element_index will track the position of the page that will be removed next
+
         int oldest_element_index = 0;
 
         //loop over the columns in ps_mapping (this lines up with the current page also)
@@ -183,7 +183,7 @@ public:
             if (pages_iterator != page_vector.end()) {
                 hits++;
             }
-            //no hit
+                //no hit
             else
             {
                 faults++;
@@ -196,19 +196,19 @@ public:
                         //will replace the oldest page in the vector with the newest page (located at pages[column])
                         page_vector[oldest_element_index] = pages[column];
                     }
-                    //if oldest_element_index is still at the top or somewhere in the middle of a column's rows
+                        //if oldest_element_index is still at the top or somewhere in the middle of a column's rows
                     else
                         page_vector[oldest_element_index] = pages[column];
-                        oldest_element_index++;
+                    oldest_element_index++;
                 }
-                //when the rows arent filled all the way to the bottom
+                    //when the rows arent filled all the way to the bottom
                 else
                 {
                     page_vector.push_back(pages.at(column));
                 }
             }
 
-            
+
             //loop over each page currently in page_vector (this will also line up with a columns rows)
             //this will put the new page in ps_mapping so it can be drawn out
             for (int row=0; row<page_vector.size(); row++)
@@ -241,7 +241,84 @@ public:
         double hits = 0;
         double faults = 0;
 
-        //implement lru here
+        vector<Page> page_vector;
+        vector<Page>::iterator pages_iterator;
+        //oldest_element_index will track the position of the page that will be removed next
+        Page last_used_page;
+
+        //loop over the columns in ps_mapping (this lines up with the current page also)
+        for (int column=0; column<ps_mapping.size(); column++)
+        {
+
+            //check for a hit
+            pages_iterator = find(page_vector.begin(), page_vector.end(), pages[column]);
+            //hit - pass all the other logic and go straight to adding the pages to ps_mappings
+            if (pages_iterator != page_vector.end()) {
+                hits++;
+            }
+                //no hit
+            else
+            {
+                faults++;
+                //this will check to see if the rows are filled out or not
+                if (page_vector.size() == segments)
+                {
+                    int max_pages = 0;
+                    //loop through all pages before the current one to determine the LRU page
+                    for (int lru_search = column-1; lru_search > 0; lru_search--)
+                    {
+
+                        for (int page=0; page<page_vector.size();page++)
+                        {
+                            Page lru;
+                            if (pages[column].number == 7)
+                            {
+                                lru = last_used_page;
+                            }
+
+                            if (page_vector[page] == pages[lru_search])
+                            {
+                                last_used_page = pages[lru_search];
+                                max_pages++;
+                                break;
+                            }
+
+                        }
+
+                        if (max_pages == page_vector.size())
+                        {
+                            break;
+                        }
+
+                    }
+
+                    //loop through page_vector and replace last_used_page with the current page
+                    for (int page=0; page<page_vector.size(); page++)
+                    {
+                        if (page_vector[page] == last_used_page)
+                        {
+                            page_vector[page] = pages[column];
+                            break;
+                        }
+                    }
+
+                }
+                    //when the rows arent filled all the way to the bottom
+                else
+                {
+                    page_vector.push_back(pages.at(column));
+                }
+            }
+
+
+            //loop over each page currently in page_vector (this will also line up with a columns rows)
+            //this will put the new page in ps_mapping so it can be drawn out
+            for (int row=0; row<page_vector.size(); row++)
+            {
+                ps_mapping.at(column).at(row) = page_vector.at(row);
+            }
+
+        }
 
         vector<double> final = {time, hits, faults};
         return final;
@@ -263,7 +340,81 @@ public:
         double hits = 0;
         double faults = 0;
 
-        //implement optimal here
+        vector<Page> page_vector;
+        vector<Page>::iterator pages_iterator;
+        //oldest_element_index will track the position of the page that will be removed next
+        Page last_used_page;
+
+        //loop over the columns in ps_mapping (this lines up with the current page also)
+        for (int column=0; column<ps_mapping.size(); column++)
+        {
+
+            //check for a hit
+            pages_iterator = find(page_vector.begin(), page_vector.end(), pages[column]);
+            //hit - pass all the other logic and go straight to adding the pages to ps_mappings
+            if (pages_iterator != page_vector.end()) {
+                hits++;
+            }
+                //no hit
+            else
+            {
+                faults++;
+                //this will check to see if the rows are filled out or not
+                if (page_vector.size() == segments)
+                {
+                    vector<Page> tbr;
+
+                    for (int tbr_search = column+1; tbr_search < pages.size(); tbr_search++)
+                    {
+                        for (int page=0; page<page_vector.size(); page++)
+                        {
+                            if (page_vector[page] == pages[tbr_search])
+                            {
+                                tbr.push_back(page_vector[page]);
+                            }
+                        }
+                    }
+
+                    if (tbr.size() == page_vector.size())
+                    {
+                        Page remove = tbr[tbr.size() - 1];
+                        for (int page=0; page<page_vector.size(); page++)
+                        {
+                            if (remove == page_vector[page])
+                            {
+                                page_vector[page] = pages[column];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int page=0; page<page_vector.size(); page++)
+                        {
+                            vector<Page>::iterator iter;
+                            iter = find(tbr.begin(), tbr.end(), page_vector[page]);
+                            if (iter == tbr.end()) {
+                                page_vector[page] = pages[column];
+                                break;
+                            }
+                        }
+                    }
+                }
+                    //when the rows arent filled all the way to the bottom
+                else
+                {
+                    page_vector.push_back(pages.at(column));
+                }
+            }
+
+
+            //loop over each page currently in page_vector (this will also line up with a columns rows)
+            //this will put the new page in ps_mapping so it can be drawn out
+            for (int row=0; row<page_vector.size(); row++)
+            {
+                ps_mapping.at(column).at(row) = page_vector.at(row);
+            }
+
+        }
 
         vector<double> final = {time, hits, faults};
         return final;
