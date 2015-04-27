@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <vector>
-#include <deque>
 #include <string>
 #include <algorithm>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -52,9 +53,6 @@ public:
 
 class Memory
 {
-private:
-    vector<Page> y_vector;
-    vector<Page> x_vector;
 
 public:
     vector<Page> pages;
@@ -164,9 +162,12 @@ public:
         Element at index 2 = The number of faults the algorithm produced
     */
     {
-        double time = 0;
         double hits = 0;
         double faults = 0;
+
+        chrono::time_point<chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
+
 
         vector<Page> page_vector;
         vector<Page>::const_iterator pages_iterator;
@@ -218,7 +219,10 @@ public:
 
         }
 
-        vector<double> final = {time, hits, faults};
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+
+        vector<double> final = {elapsed_seconds.count(), hits, faults};
         return final;
     };
 
@@ -237,9 +241,11 @@ public:
         Element at index 2 = The number of faults the algorithm produced
     */
     {
-        double time = 0;
         double hits = 0;
         double faults = 0;
+
+        chrono::time_point<chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
 
         vector<Page> page_vector;
         vector<Page>::iterator pages_iterator;
@@ -320,7 +326,10 @@ public:
 
         }
 
-        vector<double> final = {time, hits, faults};
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+
+        vector<double> final = {elapsed_seconds.count(), hits, faults};
         return final;
     };
 
@@ -335,10 +344,11 @@ public:
         Element at index 2 = The number of faults the algorithm produced
     */
     {
-
-        double time = 0;
         double hits = 0;
         double faults = 0;
+
+        chrono::time_point<chrono::system_clock> start, end;
+        start = std::chrono::system_clock::now();
 
         vector<Page> page_vector;
         vector<Page>::iterator pages_iterator;
@@ -416,9 +426,92 @@ public:
 
         }
 
-        vector<double> final = {time, hits, faults};
+        end = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end-start;
+
+        vector<double> final = {elapsed_seconds.count(), hits, faults};
         return final;
     };
 
+
+};
+
+
+class TestCase
+{
+    public:
+        Memory memory;
+
+        TestCase(Memory mem)
+        {
+            memory = mem;
+        };
+
+        void test_fifo(int count = 100)
+        {
+            vector<double> results = {0, 0, 0};
+
+            for (int i=0; i<count; i++)
+            {
+                vector<double> final = memory.play_fifo();
+                results[0] += final[0];
+                results[1] += final[1];
+                results[2] += final[2];
+            }
+
+            vector<double> averages = average_vector(results, count);
+            cout << "FIFO RESULTS FOR " << count << " ITERATIONS: " << endl;
+            cout << "\tAverage time: " << averages[0] << endl;
+            cout << "\tAverage hits: " << averages[1] << endl;
+            cout << "\tAverage faults: " << averages[2] << endl;
+        };
+
+        void test_lru(int count)
+        {
+            vector<double> results = {0, 0, 0};
+
+            for (int i=0; i<count; i++)
+            {
+                vector<double> final = memory.play_lru();
+                results[0] += final[0];
+                results[1] += final[1];
+                results[2] += final[2];
+            }
+
+            vector<double> averages = average_vector(results, count);
+            cout << "LRU RESULTS FOR " << count << " ITERATIONS: " << endl;
+            cout << "\tAverage time: " << averages[0] << endl;
+            cout << "\tAverage hits: " << averages[1] << endl;
+            cout << "\tAverage faults: " << averages[2] << endl;
+        };
+
+        void test_optimal(int count)
+        {
+            vector<double> results = {0, 0, 0};
+
+            for (int i=0; i<count; i++)
+            {
+                vector<double> final = memory.play_optimal();
+                results[0] += final[0];
+                results[1] += final[1];
+                results[2] += final[2];
+            }
+
+            vector<double> averages = average_vector(results, count);
+            cout << "OPTIMAL RESULTS FOR " << count << " ITERATIONS: " << endl;
+            cout << "\tAverage time: " << averages[0] << endl;
+            cout << "\tAverage hits: " << averages[1] << endl;
+            cout << "\tAverage faults: " << averages[2] << endl;
+        };
+
+        vector<double> average_vector(vector<double> results, int count)
+        {
+            vector<double> final;
+            final.push_back(results[0]/count);
+            final.push_back(results[1]/count);
+            final.push_back(results[2]/count);
+
+            return final;
+        };
 
 };
