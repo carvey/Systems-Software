@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <time.h>
 
 using namespace std;
 
@@ -55,7 +56,11 @@ class Memory
 {
 
 public:
+    //pages will be a vector of Pages
     vector<Page> pages;
+    //vector of the ints of all the pages. To be used to pass along randomly generated page vectors
+    //to another Memory constructor
+    vector<int> raw_pages;
     vector<vector<Page> > ps_mapping;
     int segments;
 
@@ -73,12 +78,19 @@ public:
             vector<Page> row(segments, Page(-1));
             ps_mapping.push_back(row);
         }
+
+        //fill in raw_pages
+        for (int page=0;page<pages.size();page++)
+        {
+            raw_pages.push_back(pages[page].number);
+        }
+
     };
 
     Memory(vector<int> pages_vector, int memory_segments=3)
     {
         segments = memory_segments;
-
+        
 
         for (int i = 0; i < pages_vector.size(); i++)
         {
@@ -147,7 +159,7 @@ public:
 
     };
 
-    vector<double> play_fifo()
+    vector<double> play_fifo(bool step=false)
     /*
     The function that will simulate the FIFO algorithm with the current Memory instance
 
@@ -215,6 +227,12 @@ public:
             for (int row=0; row<page_vector.size(); row++)
             {
                 ps_mapping.at(column).at(row) = page_vector.at(row);
+                if (step)
+                {
+                    print();
+                    cin.ignore();
+                    cout << endl;
+                }
             }
 
         }
@@ -226,7 +244,7 @@ public:
         return final;
     };
 
-    vector<double> play_lru()
+    vector<double> play_lru(bool step=false)
     /*
     The function that will simulate the LRU algorithm with the current Memory instance
 
@@ -322,6 +340,12 @@ public:
             for (int row=0; row<page_vector.size(); row++)
             {
                 ps_mapping.at(column).at(row) = page_vector.at(row);
+                if (step)
+                {
+                    print();
+                    cin.ignore();
+                    cout << endl;
+                }
             }
 
         }
@@ -333,7 +357,7 @@ public:
         return final;
     };
 
-    vector<double> play_optimal()
+    vector<double> play_optimal(bool step=false)
     /*
     The function that will simulate the Optimal algorithm with the current Memory instance
 
@@ -432,6 +456,7 @@ public:
         vector<double> final = {elapsed_seconds.count(), hits, faults};
         return final;
     };
+
 
 
 };
