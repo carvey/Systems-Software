@@ -465,16 +465,21 @@ public:
 class TestCase
 {
     public:
-        Memory memory;
-
-        TestCase(Memory mem)
+        int page_count;
+        int segments;
+        int count;
+        
+        TestCase(int iterations, int pages, int segment_count)
         {
-            memory = mem;
-        };
+            count = iterations;
+            page_count = pages;
+            segments = segment_count;
+        }
 
-        void test_fifo(int count = 100)
+        void test_fifo()
         {
             vector<double> results = {0, 0, 0};
+            Memory memory(page_count, segments);
 
             for (int i=0; i<count; i++)
             {
@@ -484,16 +489,17 @@ class TestCase
                 results[2] += final[2];
             }
 
-            vector<double> averages = average_vector(results, count);
+            vector<double> averages = average_vector(results);
             cout << "FIFO RESULTS FOR " << count << " ITERATIONS: " << endl;
             cout << "\tAverage time: " << averages[0] << endl;
             cout << "\tAverage hits: " << averages[1] << endl;
             cout << "\tAverage faults: " << averages[2] << endl;
         };
 
-        void test_lru(int count)
+        void test_lru()
         {
             vector<double> results = {0, 0, 0};
+            Memory memory(page_count, segments);
 
             for (int i=0; i<count; i++)
             {
@@ -503,16 +509,17 @@ class TestCase
                 results[2] += final[2];
             }
 
-            vector<double> averages = average_vector(results, count);
+            vector<double> averages = average_vector(results);
             cout << "LRU RESULTS FOR " << count << " ITERATIONS: " << endl;
             cout << "\tAverage time: " << averages[0] << endl;
             cout << "\tAverage hits: " << averages[1] << endl;
             cout << "\tAverage faults: " << averages[2] << endl;
         };
 
-        void test_optimal(int count)
+        void test_optimal()
         {
             vector<double> results = {0, 0, 0};
+            Memory memory(page_count, segments);
 
             for (int i=0; i<count; i++)
             {
@@ -522,14 +529,14 @@ class TestCase
                 results[2] += final[2];
             }
 
-            vector<double> averages = average_vector(results, count);
+            vector<double> averages = average_vector(results);
             cout << "OPTIMAL RESULTS FOR " << count << " ITERATIONS: " << endl;
             cout << "\tAverage time: " << averages[0] << endl;
             cout << "\tAverage hits: " << averages[1] << endl;
             cout << "\tAverage faults: " << averages[2] << endl;
         };
 
-        vector<double> average_vector(vector<double> results, int count)
+        vector<double> average_vector(vector<double> results)
         {
             vector<double> final;
             final.push_back(results[0]/count);

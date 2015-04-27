@@ -45,6 +45,8 @@ int main()
 	memory_3.play_optimal();
 	memory_3.print();
 
+
+
 	cout << endl;
 	int page_count;
 	cout << "Number of pages to test with: ";
@@ -55,26 +57,23 @@ int main()
 	cin >> test_iterations;
 	cout << endl;
 
-	Memory mem2(page_count, 3);
-	Memory mem3(mem2.raw_pages, 5);
-
 	cout << "----------";
 	cout << "Testing with 3 Memory Segments";
 	cout << "----------" << endl;
-	TestCase test_mem2(mem2);
-	test_mem2.test_fifo(test_iterations);
-	test_mem2.test_lru(test_iterations);
-	test_mem2.test_optimal(test_iterations);
+	TestCase test_mem2(test_iterations, page_count, 3);
+	test_mem2.test_fifo();
+	test_mem2.test_lru();
+	test_mem2.test_optimal();
 
 	cout << endl;
 
 	cout << "----------";
 	cout << "Testing with 5 Memory Segments";
 	cout << "----------" << endl;
-	TestCase test_mem3(mem3);
-	test_mem3.test_fifo(test_iterations);
-	test_mem3.test_lru(test_iterations);
-	test_mem3.test_optimal(test_iterations);
+	TestCase test_mem3(test_iterations, page_count, 5);
+	test_mem3.test_fifo();
+	test_mem3.test_lru();
+	test_mem3.test_optimal();
 
 	return 0;
 }
